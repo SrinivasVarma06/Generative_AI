@@ -1,0 +1,288 @@
+{
+  "name": "My Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1lLAy4ea6IfqRGtbpbx7gORISKbCAQMvwM1xjSLZDT4E",
+          "mode": "list",
+          "cachedResultName": "Social_Media_Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lLAy4ea6IfqRGtbpbx7gORISKbCAQMvwM1xjSLZDT4E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lLAy4ea6IfqRGtbpbx7gORISKbCAQMvwM1xjSLZDT4E/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -64
+      ],
+      "id": "1e7a08c3-1764-46c6-bce5-4f89820e77c8",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "t8WcxEVqjqvjJ17I",
+          "name": "Google Sheets Trigger account 3749"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        128
+      ],
+      "id": "8b91ac6e-9be3-4aa9-8298-769b20e8cad2",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XZY8KujMyflSpPKg",
+          "name": "Google Gemini(PaLM) Api account 9470"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        -128
+      ],
+      "id": "d0ac1035-4a9a-4214-a4d6-9fef1b3c2a75",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XZY8KujMyflSpPKg",
+          "name": "Google Gemini(PaLM) Api account 9470"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        432,
+        272
+      ],
+      "id": "d4646bfa-51f4-4754-9fc7-2fa5f6d6090c",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XZY8KujMyflSpPKg",
+          "name": "Google Gemini(PaLM) Api account 9470"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Summarize the following article in ONLY 5-7 concise bullet points.\nKeep the response under 300 words.\n\nArticle:\n{{ $json.newlinks }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        64,
+        -64
+      ],
+      "id": "9ee1bde9-7249-426c-bf5e-8be3aa77e9c7",
+      "name": "Main_Summarizer"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Assume the role of an industry expert and draft a professional LinkedIn post discussing the key points from the following AI-related news article summary.\n\nThe post should:\n- Provide insightful analysis\n- Connect with current AI industry trends\n- Encourage professional engagement and discussion\n- Highlight notable implications for businesses and technology\n- Include a professional call to action\n\nRequirements:\n- Directly start with the LinkedIn post content\n- Do NOT include introductory text like \"Here is your LinkedIn post\"\n- Keep the response under 500 words\n- Maintain a professional and engaging tone\n\nArticle Summary:\n{{ $json.text.slice(0, 3000) }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        448,
+        -272
+      ],
+      "id": "45bbe4f5-aa25-46da-8982-5819c28fc6a3",
+      "name": "Linkedin Post"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Draft an X post as an AI industry expert analyzing a key news article. The post should:\nDeliver sharp insights on the article's main points.\nConnect to current AI trends.\nSpark discussion with a thought-provoking question.\nKeep it punchy and engaging.\nEnd with a clear CTA.\nLength should be within 30 words. Focus on what matters most to the AI community. Make every word count.\nArticle summary: {{ $json.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        432,
+        96
+      ],
+      "id": "48493fad-c967-490b-8f09-853a7c4b1203",
+      "name": "X Post"
+    },
+    {
+      "parameters": {
+        "person": "Ab6xTfY7mP",
+        "text": "={{ $json.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        736,
+        -272
+      ],
+      "id": "16f96fc1-a341-4c97-addb-761664e873ee",
+      "name": "Create a post",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "Rlnl0dH9vYCJDbP9",
+          "name": "LinkedIn account 2731"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [
+        752,
+        96
+      ],
+      "id": "18138fd3-4e8a-4b40-be74-f6348fe52454",
+      "name": "Create Tweet",
+      "credentials": {
+        "twitterOAuth2Api": {
+          "id": "AjkvC2ivFD6FMGdd",
+          "name": "X account 1140"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Main_Summarizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Main_Summarizer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Linkedin Post",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "X Post",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Main_Summarizer": {
+      "main": [
+        [
+          {
+            "node": "Linkedin Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "X Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Linkedin Post": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "X Post": {
+      "main": [
+        [
+          {
+            "node": "Create Tweet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ee71cb5c-c0b7-4383-b534-8c1a5c50557b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "969257b09ad2942bbaff2e2288304f4969030574d109cdeca05bf11f630884df"
+  },
+  "id": "CHkBbNtmTEFrJb0O",
+  "tags": []
+}
