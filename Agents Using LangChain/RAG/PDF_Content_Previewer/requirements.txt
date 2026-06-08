@@ -1,0 +1,5 @@
+torchvision==0.24.1
+beautifulsoup4==4.13.4
+sentence-transformers==5.2.0
+pypdf==6.6.0
+tf-keras==2.20.1
