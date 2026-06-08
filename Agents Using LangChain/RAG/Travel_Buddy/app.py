@@ -3,11 +3,12 @@ import os
 from dotenv import load_dotenv
 
 from serpapi import GoogleSearch
-import requests
 from langchain.chat_models import init_chat_model
 from langchain_tavily import TavilySearch
 from langchain.tools import tool
 from langchain.agents import create_agent
+
+from langgraph.checkpoint.memory import InMemorySaver
 
 load_dotenv()
 
@@ -67,27 +68,56 @@ Recommend attractions, travel tips, and flights.
 Always use available tools when necessary.
 """
 
+# Memory Checkpointer
+checkpointer = InMemorySaver()
+
+# Conversation Configuration
+config = {
+    "configurable": {
+        "thread_id": "travelbuddy-thread"
+    }
+}
+
 agent = create_agent(
     model=model,
     tools=tools,
-    system_prompt=system_prompt
+    system_prompt=system_prompt,
+    checkpointer=checkpointer
 )
 
-user_query = """
-Plan a trip from Bengaluru to Singapore.
-Find destination information and available flights
-for 2026-09-15.
-"""
-
-response = agent.invoke(
+# First Query
+response1 = agent.invoke(
     {
         "messages": [
             {
                 "role": "user",
-                "content": user_query
+                "content": """
+Plan a trip from Bengaluru to Singapore.
+Find destination information and available flights
+for 2026-09-15.
+"""
             }
         ]
-    }
+    },
+    config=config
 )
 
-print(response)
+print(response1["messages"][-1].content)
+
+# Follow-up Query Demonstrating Memory
+response2 = agent.invoke(
+    {
+        "messages": [
+            {
+                "role": "user",
+                "content": """
+Based on the trip we discussed earlier,
+what are the top attractions I should visit there?
+"""
+            }
+        ]
+    },
+    config=config
+)
+
+print(response2["messages"][-1].content)

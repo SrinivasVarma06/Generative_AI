@@ -8,6 +8,8 @@ from langchain_tavily import TavilySearch
 from langchain.tools import tool
 from langchain.agents import create_agent
 
+from langgraph.checkpoint.memory import InMemorySaver
+
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -94,26 +96,56 @@ Responsibilities:
 5. Use the available tools whenever needed.
 """
 
+# Memory Checkpointer
+checkpointer = InMemorySaver()
+
+# Thread Configuration
+config = {
+    "configurable": {
+        "thread_id": "coursefinder-thread"
+    }
+}
+
+# Agent with Memory
 agent = create_agent(
     model=model,
     tools=tools,
-    system_prompt=system_prompt
+    system_prompt=system_prompt,
+    checkpointer=checkpointer
 )
 
-user_query = """
-I want to learn Machine Learning from scratch.
-Recommend the best courses and YouTube tutorials.
-"""
-
-response = agent.invoke(
+# First Query
+response1 = agent.invoke(
     {
         "messages": [
             {
                 "role": "user",
-                "content": user_query
+                "content": """
+I want to learn Machine Learning from scratch.
+Recommend the best courses and YouTube tutorials.
+"""
             }
         ]
-    }
+    },
+    config=config
 )
 
-print(response["messages"][-1].content)
+print(response1["messages"][-1].content)
+
+# Follow-up Query Demonstrating Memory
+response2 = agent.invoke(
+    {
+        "messages": [
+            {
+                "role": "user",
+                "content": """
+Based on the Machine Learning roadmap you suggested earlier,
+what should I learn after completing the beginner courses?
+"""
+            }
+        ]
+    },
+    config=config
+)
+
+print(response2["messages"][-1].content)

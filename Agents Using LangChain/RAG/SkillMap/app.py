@@ -8,6 +8,8 @@ from langchain_tavily import TavilySearch
 from langchain.tools import tool
 from langchain.agents import create_agent
 
+from langgraph.checkpoint.memory import InMemorySaver
+
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -27,7 +29,7 @@ tavily_search = TavilySearch(
     tavily_api_key=TAVILY_API_KEY
 )
 
-# Custom Job Search Tool
+# Job Search Tool
 @tool
 def search_jobs(query: str) -> str:
     """
@@ -73,27 +75,59 @@ Your responsibilities:
 6. Use available tools whenever necessary.
 """
 
+# Memory Checkpointer
+checkpointer = InMemorySaver()
+
+# Thread Configuration
+config = {
+    "configurable": {
+        "thread_id": "skillmap-thread"
+    }
+}
+
+# Agent with Memory Enabled
 agent = create_agent(
     model=model,
     tools=tools,
-    system_prompt=system_prompt
+    system_prompt=system_prompt,
+    checkpointer=checkpointer,
+    debug=True
 )
 
-user_query = """
-I know Python, SQL, and Machine Learning.
-What skills are currently in demand and
-what jobs match my profile?
-"""
-
-response = agent.invoke(
+# First Query
+response1 = agent.invoke(
     {
         "messages": [
             {
                 "role": "user",
-                "content": user_query
+                "content": """
+I know Python, SQL, and Machine Learning.
+What skills are currently in demand and
+what jobs match my profile?
+"""
             }
         ]
-    }
+    },
+    config=config
 )
 
-print(response)
+print(response1["messages"][-1].content)
+
+# Follow-up Query Demonstrating Memory
+response2 = agent.invoke(
+    {
+        "messages": [
+            {
+                "role": "user",
+                "content": """
+Based on the skills I mentioned earlier,
+what should I learn next to improve my chances
+of getting a better job?
+"""
+            }
+        ]
+    },
+    config=config
+)
+
+print(response2["messages"][-1].content)
