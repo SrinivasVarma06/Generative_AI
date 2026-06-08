@@ -1,8 +1,9 @@
 import os
-import requests
 
 from dotenv import load_dotenv
 
+from serpapi import GoogleSearch
+import requests
 from langchain.chat_models import init_chat_model
 from langchain_tavily import TavilySearch
 from langchain.tools import tool
@@ -12,29 +13,28 @@ load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
-SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY")
+SERPAPI_KEY = os.getenv("SERPAPI_KEY")
 
-# Initialize Gemini model
 model = init_chat_model(
     "google_genai:gemini-2.5-flash",
     api_key=GOOGLE_API_KEY
 )
 
-# Tavily Search Tool
 tavily_search = TavilySearch(
     max_results=5,
     search_depth="advanced",
     tavily_api_key=TAVILY_API_KEY
 )
 
-# Flight Search Tool using SerpAPI Google Flights
 @tool
-def search_flights(origin: str,destination: str,date: str) -> str:
+def search_flights(
+    origin: str,
+    destination: str,
+    date: str
+) -> str:
     """
-    Search available flights between two locations.
+    Search flights using SerpAPI Google Flights.
     """
-
-    url = "https://serpapi.com/search.json"
 
     params = {
         "engine": "google_flights",
@@ -43,15 +43,14 @@ def search_flights(origin: str,destination: str,date: str) -> str:
         "outbound_date": date,
         "currency": "INR",
         "type": "2",
-        "api_key": SERPAPI_API_KEY
+        "api_key": SERPAPI_KEY
     }
 
-    response = requests.get(
-        url,
-        params=params
-    )
+    search = GoogleSearch(params)
 
-    return response.text
+    results = search.get_dict()
+
+    return str(results)
 
 
 tools = [
@@ -62,13 +61,10 @@ tools = [
 system_prompt = """
 You are TravelBuddy Agent.
 
-Responsibilities:
-1. Research travel destinations using Tavily Search.
-2. Find flight options using the Google Flights API.
-3. Suggest attractions and travel tips.
-4. Compare flight choices when available.
-5. Help users plan complete trips.
-6. Use available tools whenever needed.
+Research destinations using Tavily Search.
+Search flights using Google Flights.
+Recommend attractions, travel tips, and flights.
+Always use available tools when necessary.
 """
 
 agent = create_agent(
